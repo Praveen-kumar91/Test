@@ -1,0 +1,83 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+class Point {
+    int x;
+    int y;
+
+    Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+public class HalfConvexPointSet {
+
+    public static boolean isHalfConvexPointSet(List<Point> points) {
+        // Sort the points based on x-coordinate
+        List<Point> sortedByX = new ArrayList<>(points);
+        Collections.sort(sortedByX, Comparator.comparingInt(p -> p.x));
+
+        // Sort the points based on y-coordinate
+        List<Point> sortedByY = new ArrayList<>(points);
+        Collections.sort(sortedByY, Comparator.comparingInt(p -> p.y));
+
+        // Check if sortedByX forms a monotonic sequence (increasing or decreasing) along both axes
+        boolean isMonotonicByX = isMonotonic(sortedByX);
+
+        // Check if sortedByY forms a monotonic sequence (increasing or decreasing) along both axes
+        boolean isMonotonicByY = isMonotonic(sortedByY);
+
+        // Return true if it can be partitioned into at most two monotonic sequences
+        return isMonotonicByX || isMonotonicByY;
+    }
+
+    private static boolean isMonotonic(List<Point> points) {
+        int n = points.size();
+        if (n <= 1) {
+            return true;
+        }
+
+        // Check if the sequence is strictly increasing or strictly decreasing
+        boolean increasingX = true;
+        boolean decreasingX = true;
+        boolean increasingY = true;
+        boolean decreasingY = true;
+
+        for (int i = 1; i < n; i++) {
+            Point prev = points.get(i - 1);
+            Point current = points.get(i);
+
+            if (current.x <= prev.x) {
+                increasingX = false;
+            }
+
+            if (current.x >= prev.x) {
+                decreasingX = false;
+            }
+
+            if (current.y <= prev.y) {
+                increasingY = false;
+            }
+
+            if (current.y >= prev.y) {
+                decreasingY = false;
+            }
+        }
+
+        // Return true if either x or y coordinates are increasing or decreasing
+        return increasingX || decreasingX || increasingY || decreasingY;
+    }
+
+    public static void main(String[] args) {
+        List<Point> points1 = List.of(new Point(1, 1), new Point(3, 5), new Point(5, 5), new Point(8, 1));
+        List<Point> points2 = List.of(new Point(1, 1), new Point(3, 5), new Point(5, 2), new Point(7, 7));
+        List<Point> points3 = List.of(new Point(2, 3), new Point(5, 2), new Point(6, 6), new Point(7, 7));
+
+        System.out.println("Is points1 a half convex point set? " + isHalfConvexPointSet(points1));
+        System.out.println("Is points2 a half convex point set? " + isHalfConvexPointSet(points2));
+        System.out.println("Is points3 a half convex point set? " + isHalfConvexPointSet(points3));
+    }
+}

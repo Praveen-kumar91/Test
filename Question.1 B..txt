@@ -1,0 +1,78 @@
+import java.util.*;
+
+public class OptimumTruckRoute {
+    static class Cell {
+        int row;
+        int col;
+        int distance;
+
+        Cell(int row, int col, int distance) {
+            this.row = row;
+            this.col = col;
+            this.distance = distance;
+        }
+    }
+
+    public static int findOptimumRoute(int[][] grid, int startX, int startY, int endX, int endY) {
+        int m = grid.length;
+        int n = grid[0].length;
+
+        // Initialize distances to a large value and set the starting cell distance to 0
+        int[][] distances = new int[m][n];
+        for (int i = 0; i < m; i++) {
+            Arrays.fill(distances[i], Integer.MAX_VALUE);
+        }
+        distances[startX][startY] = 0;
+
+        // Create a priority queue to select the cell with the smallest distance
+        PriorityQueue<Cell> pq = new PriorityQueue<>((a, b) -> a.distance - b.distance);
+        pq.offer(new Cell(startX, startY, 0));
+
+        // Define possible moves in the grid (up, down, left, right)
+        int[] dr = {-1, 1, 0, 0};
+        int[] dc = {0, 0, -1, 1};
+
+        while (!pq.isEmpty()) {
+            Cell current = pq.poll();
+            int row = current.row;
+            int col = current.col;
+
+            // If the current cell is the destination cell, return the distance
+            if (row == endX && col == endY) {
+                return distances[endX][endY];
+            }
+
+            // Explore all possible adjacent cells
+            for (int i = 0; i < 4; i++) {
+                int newRow = row + dr[i];
+                int newCol = col + dc[i];
+
+                // Check if the new cell is within the grid boundaries
+                if (newRow >= 0 && newRow < m && newCol >= 0 && newCol < n) {
+                    // Check if the new cell is accessible (not in no trespass area)
+                    if (grid[newRow][newCol] == 0) {
+                        int newDistance = distances[row][col] + 1; // Assuming distance between adjacent cells is 1
+                        if (newDistance < distances[newRow][newCol]) {
+                            distances[newRow][newCol] = newDistance;
+                            pq.offer(new Cell(newRow, newCol, newDistance));
+                        }
+                    }
+                }
+            }
+        }
+
+        // If the destination is not reachable, return -1
+        return -1;
+    }
+
+    public static void main(String[] args) {
+        int[][] grid = {
+            {0, 0, 0},
+            {1, 0, 1},
+            {0, 0, 0}
+        };
+        int startX = 0;
+        int startY = 0;
+        int endX = 2;
+        int endY = 2;
+

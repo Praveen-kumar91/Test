@@ -1,0 +1,52 @@
+import java.util.BitSet;
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class SessionIdGenerator {
+    private final AtomicInteger nextId;
+    private final BitSet availableIds;
+
+    public SessionIdGenerator() {
+        nextId = new AtomicInteger(1); // Start from 1 since 0 might be used to represent an invalid ID.
+        availableIds = new BitSet();
+    }
+
+    public int getNextSessionId() {
+        int id = nextId.getAndIncrement();
+        if (id >= 0 && id < Integer.MAX_VALUE) {
+            // Set the bit for the new ID to indicate it's active.
+            availableIds.set(id);
+            return id;
+        } else {
+            // If we've exhausted all possible IDs, start over from 1.
+            nextId.set(1);
+            availableIds.clear(); // Clear the bitset and start fresh.
+            availableIds.set(nextId.get()); // Set the bit for the new ID to indicate it's active.
+            return nextId.getAndIncrement();
+        }
+    }
+
+    public void releaseSessionId(int sessionId) {
+        // Mark the ID as available for reuse.
+        availableIds.clear(sessionId);
+    }
+
+    public static void main(String[] args) {
+        SessionIdGenerator generator = new SessionIdGenerator();
+
+        // Generate and use session IDs for some concurrent users
+        int user1SessionId = generator.getNextSessionId();
+        int user2SessionId = generator.getNextSessionId();
+        int user3SessionId = generator.getNextSessionId();
+
+        System.out.println("User 1 Session ID: " + user1SessionId);
+        System.out.println("User 2 Session ID: " + user2SessionId);
+        System.out.println("User 3 Session ID: " + user3SessionId);
+
+        // Simulate session expiration and releasing of IDs
+        generator.releaseSessionId(user2SessionId);
+
+        // Reuse the released ID for a new user
+        int newUserSessionId = generator.getNextSessionId();
+        System.out.println("New User Session ID: " + newUserSessionId);
+    }
+}

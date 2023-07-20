@@ -1,0 +1,66 @@
+import java.util.ArrayList;
+import java.util.List;
+
+class Point {
+    int x;
+    int y;
+
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+public class TruckWarehouseLocation {
+
+    public static int calculateManhattanDistance(Point p1, Point p2) {
+        return Math.abs(p1.x - p2.x) + Math.abs(p1.y - p2.y);
+    }
+
+    public static Point findOptimalWarehouseLocation(List<Point> factories) {
+        int minX = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+        int minY = Integer.MAX_VALUE;
+        int maxY = Integer.MIN_VALUE;
+
+        // Find the minimum and maximum x, y coordinates of the factories
+        for (Point factory : factories) {
+            minX = Math.min(minX, factory.x);
+            maxX = Math.max(maxX, factory.x);
+            minY = Math.min(minY, factory.y);
+            maxY = Math.max(maxY, factory.y);
+        }
+
+        // Calculate distances from each point to the possible warehouse locations
+        int minDistance = Integer.MAX_VALUE;
+        Point optimalWarehouseLocation = null;
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                Point warehouseLocation = new Point(x, y);
+                int totalDistance = 0;
+
+                for (Point factory : factories) {
+                    totalDistance += calculateManhattanDistance(warehouseLocation, factory);
+                }
+
+                if (totalDistance < minDistance) {
+                    minDistance = totalDistance;
+                    optimalWarehouseLocation = warehouseLocation;
+                }
+            }
+        }
+
+        return optimalWarehouseLocation;
+    }
+
+    public static void main(String[] args) {
+        List<Point> factories = new ArrayList<>();
+        factories.add(new Point(2, 5));
+        factories.add(new Point(7, 9));
+        factories.add(new Point(4, 3));
+
+        Point optimalWarehouse = findOptimalWarehouseLocation(factories);
+        System.out.println("Optimal warehouse location: (" + optimalWarehouse.x + ", " + optimalWarehouse.y + ")");
+    }
+}
